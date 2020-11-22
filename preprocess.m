@@ -162,10 +162,10 @@ function pushbutton6_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton4 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-I3 = handles.ImgData1;
-I4 = imadjust(I3,stretchlim(I3));
-I5 = imresize(I4,[300,400]);
+I12 = handles.ImgData5;
+I13 = ind2rgb(I12, colormap);
+I14 = imresize(I13,[300,400]);
 axes(handles.axes6);
-imshow(I5);title(' Contrast Enhanced ');
-handles.ImgData6 = I4;
+imshow(I14);title('Gray to RGB');
+handles.ImgData6 = I13;
 guidata(hObject,handles);
