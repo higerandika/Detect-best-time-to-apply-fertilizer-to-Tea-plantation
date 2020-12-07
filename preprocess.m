@@ -22,7 +22,7 @@ function varargout = preprocess(varargin)
 
 % Edit the above text to modify the response to help preprocess
 
-% Last Modified by GUIDE v2.5 22-Nov-2020 21:07:01
+% Last Modified by GUIDE v2.5 05-Dec-2020 09:37:09
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -95,22 +95,6 @@ imshow(ss);
 handles.ImgData1 = I;
 guidata(hObject,handles);
 
-% --- Executes on button press in pushbutton2.
-function pushbutton2_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-%clear all
-%close all
-I3 = handles.ImgData1;
-I4 = imadjust(I3,stretchlim(I3));
-I5 = imresize(I4,[300,400]);
-axes(handles.axes2);
-imshow(I5);title(' Contrast Enhanced ');
-handles.ImgData2 = I4;
-guidata(hObject,handles);
-
-
 % --- Executes on button press in pushbutton6.
 function pushbutton3_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton6 (see GCBO)
@@ -118,8 +102,8 @@ function pushbutton3_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 I3 = handles.ImgData1;
-I4 = imadjust(I3,stretchlim(I3));
-I5 = imresize(I4,[300,400]);
+%I4 = imadjust(I3,stretchlim(I3));
+I5 = imresize(I3,[300,400]);
 gray = rgb2gray(I5);
 imhist(gray);
 imhist(gray);
@@ -157,15 +141,94 @@ imshow(I11);title('Noise Removed by Wiener Filter');
 handles.ImgData5 = I10   ;
 guidata(hObject,handles);
 
+% --- Executes on button press in pushbutton2.
+function pushbutton2_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+%clear all
+%close all
+Icn = handles.ImgData5;
+Icn1 = imadjust(Icn,stretchlim(Icn));
+Icn2 = imresize(Icn1,[300,400]);
+axes(handles.axes2);
+imshow(Icn2);title(' Contrast Enhanced ');
+handles.ImgData2 = Icn1;
+guidata(hObject,handles);
+
+
+
 % --- Executes on button press in pushbutton4.
 function pushbutton6_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton4 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 I12 = handles.ImgData5;
-I13 = ind2rgb(I12, colormap);
+%I13 = ind2rgb(I12, colormap);
+%it should be RGB color image.but not work
+I13 = ind2rgb(gray, colormap);
 I14 = imresize(I13,[300,400]);
 axes(handles.axes6);
 imshow(I14);title('Gray to RGB');
 handles.ImgData6 = I13;
 guidata(hObject,handles);
+
+
+% --- Executes on button press in pushbutton9.
+function pushbutton9_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton9 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+%Image segmentation using K-Mean Algorithm
+%
+%function segment_image()
+threshold = 0.01;
+Iseg1 = handles.ImgData2;
+Iseg1=medfilt2(Iseg1,[3 3]); %Median filtering the image to remove noise%
+%
+%Hist = imhist(Iseg1,256);
+%
+BW = edge(Iseg1,'sobel'); %finding edges 
+[imx,imy]=size(BW);
+msk=[0 0 0 0 0;
+     0 1 1 1 0;
+     0 1 1 1 0;
+     0 1 1 1 0;
+     0 0 0 0 0;];
+B=conv2(double(BW),double(msk)); %Smoothing  image to reduce the number of connected components
+L = bwlabel(B,8);% Calculating connected components
+mx=max(max(L))
+% There will be mx connected components.Here U can give a value between 1 and mx for L or in a loop you can extract all connected components
+% If you are using the attached car image, by giving 17,18,19,22,27,28 to L you can extract the number plate completely.
+[r,c] = find(L==17);  
+rc = [r c];
+[sx sy]=size(rc);
+n1=zeros(imx,imy); 
+for i=1:sx
+    x1=rc(i,1);
+    y1=rc(i,2);
+    n1(x1,y1)=255;
+end % Storing the extracted image in an array
+
+Iseg2 = imresize(B,[300,400]);
+axes(handles.axes10);
+imshow(Iseg2);title(' Edge ditect ');
+handles.ImgData7 = Iseg2;
+guidata(hObject,handles);
+figure,imshow(n1,[]);
+
+
+% --- Executes on button press in pushbutton11.
+function pushbutton11_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton11 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+Iseg3 = handles.ImgData7;
+
+Iseg4 = imresize(Iseg3,[300,400]);
+axes(handles.axes11);
+imshow(Iseg4);title('Edge ditect');
+handles.ImgData8 = Iseg4   ;
+guidata(hObject,handles);
+
